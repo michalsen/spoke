@@ -1,0 +1,15 @@
+# Drush alias to AWS
+
+#LIVE
+live:
+  host: [IP_ADDRESS | URI]
+  user: bitnami
+  root: /home/bitnami/stack/drupal
+  uri: http://[IP_ADDRESS | URI]
+  paths:
+    drush-script: /opt/bitnami/drupal/vendor/bin/drush
+  ssh:
+    options: '-i [PATH TO .pem FILE]'
+
+#DEV - coming
+#STAGING - coming
