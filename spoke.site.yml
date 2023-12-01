@@ -1,5 +1,14 @@
 # Drush alias to AWS
 
+## DDEV
+#  drush.yml
+  # drush:
+  #   php:
+  #     minimum-version: 8.1.0 (or what you need)
+  #   paths:
+  #     alias-path:
+  #       - '/var/www/html/web/.ddev/drush/sites' (container path)
+
 #LIVE
 live:
   host: [IP_ADDRESS | URI]
