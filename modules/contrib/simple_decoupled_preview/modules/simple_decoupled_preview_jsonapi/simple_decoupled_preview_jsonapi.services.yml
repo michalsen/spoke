@@ -1,0 +1,20 @@
+services:
+  # Overwrites @jsonapi.normalization_cacher.
+  jsonapi.normalization_cacher:
+    class: Drupal\simple_decoupled_preview_jsonapi\EventSubscriber\ResourceObjectNormalizationCacher
+    calls:
+      - ['setRenderCache', ['@render_cache']]
+    tags:
+      - { name: event_subscriber }
+
+  # Controller. Extends @jsonapi.entity_resource.
+  simple_decoupled_preview_jsonapi.entity_resource:
+    class: Drupal\simple_decoupled_preview_jsonapi\Controller\EntityResource
+    parent: jsonapi.entity_resource
+
+  # Overwrites @jsonapi.include_resolver.
+  simple_decoupled_preview_jsonapi.include_resolver:
+    class: Drupal\simple_decoupled_preview_jsonapi\IncludeResolver
+    arguments:
+      - '@entity_type.manager'
+      - '@jsonapi.entity_access_checker'

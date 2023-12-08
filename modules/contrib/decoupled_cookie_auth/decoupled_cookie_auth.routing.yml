@@ -1,0 +1,9 @@
+decoupled_cookie_auth.decoupled_cookie_auth_configuration_form:
+  path: '/admin/config/decoupled_cookie_auth/configuration'
+  defaults:
+    _form: '\Drupal\decoupled_cookie_auth\Form\ConfigurationForm'
+    _title: 'ConfigurationForm'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

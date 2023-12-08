@@ -1,0 +1,11 @@
+name: Build scripts
+type: module
+description: Run build programs from Drupal.
+package: OE
+core: 8.x
+core_version_requirement: ^8 || ^9 || ^10
+
+# Information added by Drupal.org packaging script on 2023-04-18
+version: '2.0.0-beta1'
+project: 'build_scripts'
+datestamp: 1681851025

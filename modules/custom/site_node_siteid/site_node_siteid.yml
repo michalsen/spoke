@@ -1,0 +1,5 @@
+name: 'Site Node SiteID'
+type: module
+description: 'Assigns a users SiteID to node, on node creation'
+core_version_requirement: ^10
+package: Custom

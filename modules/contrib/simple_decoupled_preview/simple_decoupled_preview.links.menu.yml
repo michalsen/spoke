@@ -1,0 +1,5 @@
+simple_decoupled_preview.settings_form:
+  title: 'Simple Decoupled Preview'
+  route_name: simple_decoupled_preview.settings_form
+  description: 'Settings to configure Simple Decoupled Preview'
+  parent: system.admin_config_services

@@ -1,0 +1,13 @@
+name: 'Key Authentication'
+type: module
+description: 'Provides an authentication provider based on per-user API keys.'
+package: Web services
+core_version_requirement: "^9.5 || ^10"
+configure: key_auth.settings
+dependencies:
+  - drupal:user
+
+# Information added by Drupal.org packaging script on 2023-02-21
+version: '2.1.0'
+project: 'key_auth'
+datestamp: 1676961220

@@ -1,0 +1,14 @@
+
+# LIVE
+live:
+  host: 3.92.186.144
+  user: bitnami
+  root: /home/bitnami/stack/drupal
+  uri: http://3.92.186.144
+  paths:
+    drush-script: /opt/bitnami/drupal/vendor/bin/drush
+  ssh:
+    options: '-i /var/www/html/.ddev/certs/LightsailDefaultKey-us-east-1.pem'
+
+# DEV - coming
+# STAGING - coming

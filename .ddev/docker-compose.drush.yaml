@@ -1,0 +1,5 @@
+version: '3.6'
+services:
+  web:
+    volumes:
+      - "/Users/ericmichalsen/Sites/Spoke/.ddev/drush/sites"

@@ -1,0 +1,6 @@
+allow_registration_only_email: true
+frontend_reset_password_path: ''
+frontend_change_password_path: ''
+frontend_request_password_reset_path: ''
+frontend_url: ''
+frontend_login: ''

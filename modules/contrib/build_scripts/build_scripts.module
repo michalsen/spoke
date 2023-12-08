@@ -1,0 +1,76 @@
+<?php
+
+use Drupal\Core\Url;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+
+/**
+ * @file
+ * Primary module hooks for Build scripts module.
+ *
+ * @DCG
+ * This file is no longer required in Drupal 8.
+ * @see https://www.drupal.org/node/2217931
+ */
+
+/**
+ * Implements hook_toolbar().
+ */
+function build_scripts_toolbar() {
+  $items = [];
+  $items['build_scripts'] = [
+    '#cache' => [
+      'contexts' => [
+        'user.permissions',
+      ],
+      'tags' => [
+        'config:build_scripts.settings'
+      ]
+    ],
+  ];
+
+  if (\Drupal::currentUser()->hasPermission("use build_scripts")) {
+    $config = \Drupal::config('build_scripts.settings');
+    $stages = $config->get('stages');
+    $links = [];
+
+    foreach ($stages as $stage) {
+      $links[$stage] = [
+        'title' => t($stage),
+        'url' => Url::fromRoute('build_scripts.start', [ 'stage' => $stage ]),
+        'attributes' => [
+          'data-toolbar-builder' => $stage,
+        ]
+      ];
+    }
+
+    $items['build_scripts'] += [
+      '#type' => 'toolbar_item',
+      '#weight' => 9999,
+      'tab' => [
+        '#type' => 'html_tag',
+        '#tag' => 'a',
+        '#value' => t('Build'),
+        '#attributes' => [
+          'class' => ['toolbar-icon', 'toolbar-icon-system-admin-config'],
+        ]
+      ],
+      'tray' => [
+        '#heading' => t('Select environment'),
+        'content' => [
+          '#theme' => 'links__toolbar_builder',
+          '#links' => $links,
+          '#attributes' => [
+            'class' => ['toolbar-menu'],
+          ],
+        ],
+      ],
+      '#attached' => [
+        'library' => ['build_scripts/build_scripts.toolbar'],
+      ],
+    ];
+  }
+
+  return $items;
+}

@@ -1,0 +1,22 @@
+services:
+  logger.channel.decoupled_cookie_auth:
+    parent: logger.channel_base
+    arguments: [ 'decoupled_cookie_auth' ]
+  decoupled_cookie_auth.redirect_response_subscriber:
+    class: Drupal\decoupled_cookie_auth\EventSubscriber\RedirectResponseSubscriber
+    arguments: ['@decoupled_cookie_auth.service']
+    tags:
+      - { name: event_subscriber }
+  decoupled_cookie_auth.access_denied_subscriber:
+    class: Drupal\decoupled_cookie_auth\EventSubscriber\AccessDeniedSubscriber
+    arguments: [ '@current_user', '@config.factory', '@current_route_match', '@decoupled_cookie_auth.service' ]
+    tags:
+      - { name: event_subscriber }
+  decoupled_cookie_auth.request_subscriber:
+    class: Drupal\decoupled_cookie_auth\EventSubscriber\RequestSubscriber
+    arguments: ['@current_route_match' ]
+    tags:
+      - { name: event_subscriber }
+  decoupled_cookie_auth.service:
+    class: Drupal\decoupled_cookie_auth\DecoupledCookieAuthService
+    arguments: ['@config.factory']

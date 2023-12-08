@@ -1,0 +1,32 @@
+{
+  "name": "drupal/simple_decoupled_preview",
+  "type": "drupal-module",
+  "description": "Simple Decoupled Preview",
+  "keywords": ["Drupal", "Decoupled"],
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://www.drupal.org/project/simple_decoupled_preview",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/simple_decoupled_preview"
+  },
+  "authors": [
+    {
+      "name": "Andy Marquis",
+      "homepage": "https://www.drupal.org/u/apmsooner",
+      "role": "Maintainer"
+    },
+    {
+      "name": "Damien McKenna",
+      "homepage": "https://www.drupal.org/u/damienmckenna",
+      "role": "Maintainer"
+    },
+    {
+      "name": "Mark Shropshire (shrop)",
+      "homepage": "https://www.drupal.org/u/shrop",
+      "role": "Maintainer"
+    }
+  ],
+  "require": {
+    "drupal/core": "^9 || ^10",
+    "drupal/restui": "^1.18"
+  }
+}

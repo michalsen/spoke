@@ -1,0 +1,23 @@
+simple_decoupled_preview.settings:
+  type: config_object
+  label: 'Simple Decoupled Preview Settings'
+  mapping:
+    preview_callback_url:
+      type: uri
+      label: 'Preview Iframe URL'
+    bundles:
+      type: sequence
+      label: 'Node Types'
+      sequence:
+        type: string
+    includes:
+      type: sequence
+      label: 'Includes'
+      sequence:
+        type: string
+    delete_log_entities:
+      type: boolean
+      label: 'Delete Old Preview Log Entities'
+    log_expiration:
+      type: string
+      label: 'Previews Log Expiration'

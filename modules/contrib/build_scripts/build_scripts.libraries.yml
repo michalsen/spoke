@@ -1,0 +1,21 @@
+build_scripts.toolbar:
+  version: VERSION
+  css:
+    theme:
+      css/build_scripts.toolbar.css: {}
+  js:
+    js/build_scripts.toolbar.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+build_scripts.builder:
+  version: VERSION
+  css:
+    theme:
+      css/build_scripts.builder.css: {}
+  js:
+    js/build_scripts.builder.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupalSettings

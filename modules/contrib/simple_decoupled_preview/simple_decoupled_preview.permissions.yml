@@ -1,0 +1,21 @@
+administer simple decoupled preview:
+  title: 'Administer Simple Decoupled Preview settings'
+  description: 'Administer configuration settings for the Simple Decoupled Preview module.'
+  restrict access: TRUE
+
+add preview log entity entities:
+  title: 'Create new Preview log entity entities'
+
+administer preview log entity entities:
+  title: 'Administer Preview log entity entities'
+  description: 'Allow to access the administration form to configure Preview log entity entities.'
+  restrict access: TRUE
+
+delete preview log entity entities:
+  title: 'Delete Preview log entity entities'
+
+edit preview log entity entities:
+  title: 'Edit Preview log entity entities'
+
+view preview log entity entities:
+  title: 'View Preview log entity entities'

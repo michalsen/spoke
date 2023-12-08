@@ -1,0 +1,13 @@
+services:
+  simple_decoupled_preview.logger:
+    class: Drupal\simple_decoupled_preview\PreviewLogger
+    arguments: ['@config.factory', '@entity_type.manager', '@entity.repository', '@simple_decoupled_preview.entity_to_jsonapi_preview']
+
+  simple_decoupled_preview.entity_to_jsonapi_preview:
+    class: Drupal\simple_decoupled_preview_jsonapi\EntityToJsonApiPreview
+    arguments:
+      - '@http_kernel.basic'
+      - '@jsonapi.resource_type.repository'
+      - '@session'
+      - '@request_stack'
+

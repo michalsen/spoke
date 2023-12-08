@@ -1,0 +1,9 @@
+{
+  "name": "drupal/build_scripts",
+  "description": "Add functionality to run scripts from within Drupal user interface",
+  "type": "drupal-module",
+  "license": "MIT",
+  "require": {
+    "drupal/core": "^9 || ^10"
+  }
+}

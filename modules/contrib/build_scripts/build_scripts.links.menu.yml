@@ -1,0 +1,5 @@
+build_scripts.settings:
+  title: "Builder settings"
+  description: "Configure builder settings"
+  parent: system.admin_config_system
+  route_name: build_scripts.settings_form

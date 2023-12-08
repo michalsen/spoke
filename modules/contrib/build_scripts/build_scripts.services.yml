@@ -1,0 +1,4 @@
+services:
+  build_scripts.build_manager:
+    class: Drupal\build_scripts\BuildManager
+    arguments: ["@config.factory", "@http_client_factory"]

@@ -1,0 +1,182 @@
+<?php
+
+/**
+ * @file
+ * Module implementation file.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_help().
+ */
+function simple_decoupled_preview_help($route_name, RouteMatchInterface $routeMatch) {
+  switch ($route_name) {
+    case 'help.page.simple_decoupled_preview':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Provides a node preview logging service, REST endpoint to fetch preview log entities and an iframe that renders a decoupled preview page. The module is designed as an alternative to Gatsby preview provided through the gatsby module but can be used with any frontend framework.') . '</p>';
+      $output .= '<p>' . t('Detailed setup instructions are provided in the <a href=":project_page" target="_blank">documentation</a> page.', [':project_page' => 'https://www.drupal.org/docs/extending-drupal/contributed-modules/contributed-modules/simple-decoupled-preview']);
+      $output .= '<h3>' . t('Useage') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Simple Decoupled Preview Configuration') . '</dt>';
+      $output .= '<dd>' . t('You can configure node types in the <a href=":settings">Simple Decoupled Preview</a> settings page', [':settings' => Url::fromRoute('simple_decoupled_preview.settings_form')->toString()]) . '</dd>';
+      $output .= '<dt>' . t('REST configuration') . '</dt>';
+      $output .= '<dd>' . t('Enable the <em>Simple Decoupled Preview JSON</em> resource in the <a href=":rest">REST resources</a> page.', [':rest' => Url::fromRoute('restui.list')->toString()]) . '</dd>';
+      $output .= '<dt>' . t('REST permissions') . '</dt>';
+      $output .= '<dd>' . t('Assign the <em>Access GET on Simple Decoupled Preview JSON resource</em> permission to user role(s) accessing the api in the <a href=":permissions">Permissions</a> page.', [':permissions' => Url::fromRoute('user.admin_permissions')->toString()]) . '</dd>';
+      $output .= '<dt>' . t('Node Type Preview Configuration') . '</dt>';
+      $output .= '<dd><ul>';
+      $output .= '<li>Enable the <em>preview</em> button by selecting either <em>Optional</em> or <em>Required</em> in the <strong>Preview before submitting field.</strong></li>';
+      $output .= '<li>Enable the <strong>Decoupled Preview</strong> view mode in the <em>Manage display</em> settings page.</li>';
+      $output .= '</ul></dd>';
+      $output .= '</dl>';
+      return $output;
+  }
+  return NULL;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function simple_decoupled_preview_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (isset($form['actions']['preview'])) {
+    $form['actions']['preview']['#submit'][] = 'simple_decoupled_preview_preview_submit';
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function simple_decoupled_preview_form_node_preview_form_select_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (\Drupal::routeMatch()->getParameter('view_mode_id') === 'decoupled_preview') {
+    // Disable the view mode select field for preview page.
+    $form['view_mode']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Custom submit function for node preview button.
+ */
+function simple_decoupled_preview_preview_submit($form, FormStateInterface $form_state): void {
+  /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+  $entity = $form_state->getFormObject()->getEntity();
+  $bundles = \Drupal::config('simple_decoupled_preview.settings')->get('bundles');
+  $preview_display = 'decoupled_preview';
+  $display_repository = \Drupal::service('entity_display.repository');
+  if (in_array($entity->bundle(), $bundles)) {
+    $bundle_displays = array_keys($display_repository->getViewModeOptionsByBundle('node', $entity->bundle()));
+    if (in_array($preview_display, $bundle_displays)) {
+      \Drupal::service('simple_decoupled_preview.logger')->logEntity($entity);
+      $route_params = $form_state->getRedirect()->getRouteParameters();
+      $route_params['view_mode_id'] = $preview_display;
+      $form_state->setRedirect('entity.node.preview', $route_params);
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function simple_decoupled_preview_theme($existing, $type, $theme, $path) {
+  return [
+    'node__decoupled_preview' => [
+      'base hook' => 'node',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function simple_decoupled_preview_entity_extra_field_info(): array {
+  $extra = [];
+  $bundles = \Drupal::config('simple_decoupled_preview.settings')->get('bundles');
+
+  if (!empty($bundles)) {
+    foreach ($bundles as $bundle) {
+      $extra['node'][$bundle]['display']['preview_iframe'] = [
+        'label' => t('Preview iframe'),
+        'description' => t('A preview of this content using api response of entity preview displayed using an iframe.'),
+        'weight' => 100,
+        'visible' => FALSE,
+      ];
+    }
+  }
+
+  return $extra;
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function simple_decoupled_preview_entity_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode): void {
+  $config = \Drupal::config('simple_decoupled_preview.settings');
+  $bundles = $config->get('bundles');
+  $server_url = $config->get('preview_callback_url');
+
+  if (!in_array($entity->bundle(), $bundles) || empty($server_url) || $view_mode !== 'decoupled_preview') {
+    return;
+  }
+
+  $routeMatch = \Drupal::routeMatch();
+  $node_preview = $routeMatch->getParameter('node_preview');
+  if ($node_preview instanceof NodeInterface) {
+    $url = preg_replace('/\/$/', '', $server_url)
+      . '/' . $node_preview->bundle()
+      . '/' . $node_preview->uuid()
+      . '/' . $node_preview->language()->getId()
+      . '/' . \Drupal::currentUser()->id();
+
+    // Render the preview for this entity.
+    $build['preview_iframe'] = [
+      '#type' => 'inline_template',
+      '#template' => '<div class="preview-iframe-container"><iframe class="preview-iframe" src="{{ url }}"></iframe></div>',
+      '#context' => [
+        'url' => $url,
+      ],
+      '#attached' => [
+        'library' => [
+          'simple_decoupled_preview/iframe_preview',
+        ],
+      ],
+    ];
+  }
+}
+
+/**
+ * Implements hook_jsonapi_ENTITY_TYPE_filter_access() for 'preview_log_entity'.
+ */
+function simple_decoupled_preview_jsonapi_preview_log_entity_filter_access(EntityTypeInterface $entity_type, AccountInterface $account) {
+  return ([
+    JSONAPI_FILTER_AMONG_ALL => AccessResult::allowed(),
+    JSONAPI_FILTER_AMONG_PUBLISHED => AccessResult::allowed(),
+    JSONAPI_FILTER_AMONG_OWN => AccessResult::allowed(),
+  ]);
+}
+
+/**
+ * Implements hook_cron().
+ */
+function simple_decoupled_preview_cron(): void {
+  // Do not delete entities if delete setting is not enabled.
+  if (!\Drupal::config('simple_decoupled_preview.settings')->get('delete_log_entities')) {
+    return;
+  }
+
+  // Make sure a valid expiration setting is set.
+  $expiration = \Drupal::config('simple_decoupled_preview.settings')->get('log_expiration');
+  if (!$expiration) {
+    return;
+  }
+
+  \Drupal::service('simple_decoupled_preview.logger')->deleteExpiredLoggedEntities(time() - $expiration);
+}

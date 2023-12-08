@@ -1,0 +1,2 @@
+address: "http://localhost:9999"
+stages: ["live"]

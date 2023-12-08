@@ -1,0 +1,6 @@
+decoupled_cookie_auth.decoupled_cookie_auth_configuration_form:
+  title: 'Decoupled Cookie Auth'
+  route_name: decoupled_cookie_auth.decoupled_cookie_auth_configuration_form
+  description: 'Configure decouple cookie authentication'
+  parent: system.admin_config_services
+  weight: 99

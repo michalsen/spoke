@@ -1,0 +1,13 @@
+simple_decoupled_preview.settings_form:
+  title: 'Settings'
+  route_name: simple_decoupled_preview.settings_form
+  description: 'Settings to configure Simple Decoupled Preview'
+  base_route: simple_decoupled_preview.settings_form
+  weight: 0
+
+simple_decoupled_preview.previews_log:
+  title: 'Previews Log'
+  route_name: simple_decoupled_preview.previews_log
+  description: 'View Previews Log'
+  base_route: simple_decoupled_preview.settings_form
+  weight: 10

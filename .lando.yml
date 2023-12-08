@@ -1,0 +1,7 @@
+name: spoke
+recipe: drupal10
+config:
+  webroot: .
+services:
+  appserver:
+    type: php:8.2.0

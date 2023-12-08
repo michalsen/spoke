@@ -1,0 +1,13 @@
+name: Simple Decoupled Preview JSON:API Node Preview
+type: module
+description: Exposes node previews in JSON:API.
+package: Web services
+core_version_requirement: ^9 || ^10
+dependencies:
+  - drupal:node
+  - drupal:jsonapi
+
+# Information added by Drupal.org packaging script on 2023-06-06
+version: '1.0.0-rc2'
+project: 'simple_decoupled_preview'
+datestamp: 1686082834

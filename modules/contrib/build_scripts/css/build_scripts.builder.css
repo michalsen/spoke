@@ -1,0 +1,11 @@
+/**
+ * @file
+ * Styling for OE builder module's builder page.
+ */
+
+#builder-output {
+  display: block;
+  font-family: monospace;
+  white-space: pre;
+  margin: 1em 0;
+}

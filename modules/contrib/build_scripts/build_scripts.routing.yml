@@ -1,0 +1,29 @@
+build_scripts.settings_form:
+  path: "/admin/config/system/build"
+  defaults:
+    _title: "Build scripts manager settings"
+    _form: 'Drupal\build_scripts\Form\BuildSettingsForm'
+  requirements:
+    _permission: "administer build_scripts configuration"
+build_scripts.start:
+  path: "/admin/build/{stage}"
+  methods: [POST]
+  defaults:
+    _title: "Builder"
+    _controller: '\Drupal\build_scripts\Controller\BuildController::start'
+  requirements:
+    _permission: "use build_scripts"
+build_scripts.view:
+  path: "/admin/build/{stage}"
+  defaults:
+    _controller: '\Drupal\build_scripts\Controller\BuildController::view'
+    _title_callback: '\Drupal\build_scripts\Controller\BuildController::getTitle'
+  requirements:
+    _permission: "use build_scripts"
+build_scripts.logs:
+  path: "/admin/build/logs/{build_id}"
+  defaults:
+    _title: "Builder logs"
+    _controller: '\Drupal\build_scripts\Controller\BuildController::logs'
+  requirements:
+    _permission: "use build_scripts"

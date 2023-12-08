@@ -1,0 +1,8 @@
+use build_scripts:
+  title: "Build site"
+  description: "Gives user access to build site and view build logs."
+
+administer build_scripts configuration:
+  title: "Administer builder"
+  description: "Gives users access to configure builder settings."
+  restrict access: TRUE

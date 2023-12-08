@@ -1,0 +1,22 @@
+decoupled_cookie_auth.configuration:
+  type: config_object
+  label: 'Decoupled Cookie Auth configuration'
+  mapping:
+    allow_registration_only_email:
+      type: boolean
+      label: 'Allow new user registration by only email and password'
+    frontend_reset_password_path:
+      type: string
+      label: 'Frontend reset password path'
+    frontend_change_password_path:
+      type: string
+      label: 'Frontend change password path'
+    frontend_request_password_reset_path:
+      type: string
+      label: 'Frontend request password reset path'
+    frontend_url:
+      type: uri
+      label: 'Frontend absolute base url'
+    frontend_login:
+      type: string
+      label: 'Frontend login path'

@@ -1,0 +1,9 @@
+# @file
+# Custom asset libraries for the simple_decoupled_preview module.
+
+# Loads preview content in an iframe.
+iframe_preview:
+  version: VERSION
+  css:
+    theme:
+      css/iframe_preview.css: {}

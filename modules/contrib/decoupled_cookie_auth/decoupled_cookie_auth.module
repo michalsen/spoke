@@ -1,0 +1,151 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations.
+ */
+
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\user\Entity\User;
+use Drupal\user\UserInterface;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+
+/**
+ * Implements hook_ENTITY_TYPE_load().
+ *
+ * Skip the current password constraint when a user updates their own password
+ * when they logged in via a one-time link with a pass-reset-token query
+ * parameter in the URL.
+ *
+ * @see \Drupal\user\AccountForm
+ */
+function decoupled_cookie_auth_user_load($entities) {
+  /** @var \Drupal\user\Entity\User $account */
+  foreach ($entities as $account) {
+    // To skip the current password field, the user must have logged in via a
+    // one-time link and have the token in the URL.
+    $token = \Drupal::request()->query->get('pass-reset-token');
+    if ($account->id() === \Drupal::currentUser()->id() && !empty($token)) {
+      $session_key = 'pass_reset_' . $account->id();
+      /** @var \Drupal\Core\Http\RequestStack $request_stack */
+      $request_stack = \Drupal::service('request_stack');
+      $session_value = $request_stack->getCurrentRequest()->getSession()->get($session_key);
+      $user_pass_reset = isset($session_value) && hash_equals($session_value, $token);
+      if ($user_pass_reset) {
+        $account->_skipProtectedUserFieldConstraint = TRUE;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_create().
+ *
+ * Adds a generated unique username to the account created via POST to
+ * /user/register?_format=json to support decoupled registration by only email
+ * and password.
+ */
+function decoupled_cookie_auth_user_create(UserInterface $account) {
+  $logger = \Drupal::logger('decoupled_cookie_auth');
+  $allowOnlyEmail = \Drupal::config('decoupled_cookie_auth.configuration')->get('allow_registration_only_email');
+  $isRoute = \Drupal::routeMatch()->getRouteName() === 'rest.user_registration.POST';
+  $isJson = \Drupal::request()->getRequestFormat() === 'json';
+  if ($allowOnlyEmail && $isRoute && $isJson && empty($account->getAccountName())) {
+    /** @var \Drupal\Component\Serialization\Json $serializer */
+    $serializer = \Drupal::service('serialization.json');
+    $data = $serializer->decode(Drupal::request()->getContent());
+    /** @var \Drupal\Component\Utility\EmailValidator $email_validator */
+    $email_validator = \Drupal::service('email.validator');
+    if (!$email_validator->isValid($data['mail']['value'])) {
+      $logger->error('The email %email is invalid', ['%email' => $data['mail']['value']]);
+      throw new BadRequestHttpException('The email is not valid.');
+    }
+    if (empty($data['name']['value'])) {
+      $result = explode("@", $data['mail']['value']);
+      $name = decoupled_cookie_auth_cleanup_username($result[0]);
+      // Iterate until we find a unique name.
+      $i = 0;
+      $query = \Drupal::entityQuery('user')->count();
+      do {
+        $new_name = empty($i) ? $name : $name . '_' . $i;
+        $num_found = $query->condition('name', $new_name)->accessCheck(FALSE)->execute();
+        $i++;
+      } while ($num_found > 0);
+      $account->setUsername($new_name);
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ *
+ * Automatically log in a user when they register a new account via POST to
+ * /user/register?_format=json.
+ */
+function decoupled_cookie_auth_user_insert(UserInterface $account) {
+  $isRoute = \Drupal::routeMatch()->getRouteName() === 'rest.user_registration.POST';
+  $isJson = \Drupal::request()->getRequestFormat() === 'json';
+  $isAnonymous = \Drupal::currentUser()->isAnonymous();
+  $config = \Drupal::config('user.settings');
+  if ($isAnonymous && $isRoute && $isJson && !$config->get('verify_mail') && $account->isActive()) {
+    user_login_finalize($account);
+  }
+}
+
+/**
+ * Cleans up username.
+ *
+ * Mostly copied from the email_registration_cleanup_username() function
+ * in the email_registration module.
+ *
+ * @param string $name
+ *   The username to be cleaned up.
+ *
+ * @return string
+ *   Cleaned up username that passes validation.
+ */
+function decoupled_cookie_auth_cleanup_username($name) {
+  // Strip illegal characters.
+  $name = preg_replace('/[^\x{80}-\x{F7} a-zA-Z0-9@_.\'-]/', '', $name);
+
+  // Strip leading and trailing spaces.
+  $name = trim($name);
+
+  // Convert any other series of spaces to a single underscore.
+  $name = preg_replace('/\s+/', '_', $name);
+
+  // Truncate to a reasonable size.
+  $name = (mb_strlen($name) > (UserInterface::USERNAME_MAX_LENGTH - 10)) ? mb_substr($name, 0, UserInterface::USERNAME_MAX_LENGTH - 11) : $name;
+
+  // If there's nothing left, or it doesn't validate, use a default.
+  return ('' === $name || user_validate_name($name) !== NULL) ? t('user') : $name;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ *
+ * Removes the password reset token from the user's session after the user
+ * updates their own account.
+ *
+ * @see \Drupal\user\AccountForm::submitForm
+ */
+function decoupled_cookie_auth_user_update(User $user) {
+  // If there's a session set to the user's id, remove the password reset tag
+  // since a new password was saved.
+  if (\Drupal::currentUser()->id() == $user->id() && \Drupal::request()->hasSession()) {
+    \Drupal::request()->getSession()->remove('pass_reset_' . $user->id());
+  }
+}
+
+/**
+ * Implements hook_tokens_alter().
+ *
+ * Alter the [site:login-url] token to point to the frontend login page.
+ */
+function decoupled_cookie_auth_tokens_alter(array &$replacements, array $context, BubbleableMetadata $bubbleable_metadata) {
+  if ($context['type'] === 'site' && array_key_exists('login-url', $context['tokens'])) {
+    /** @var \Drupal\decoupled_cookie_auth\DecoupledCookieAuthService $serviceDecoupledCookieAuth */
+    $serviceDecoupledCookieAuth = \Drupal::service('decoupled_cookie_auth.service');
+    $replacements[$context['tokens']['login-url']] = $serviceDecoupledCookieAuth->login()->toString();
+  }
+}

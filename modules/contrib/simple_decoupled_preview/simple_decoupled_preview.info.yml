@@ -1,0 +1,17 @@
+name: Simple Decoupled Preview
+type: module
+description: Provides a preview logging service for JSON:API.
+package: Web services
+core_version_requirement: ^9 || ^10
+configure: simple_decoupled_preview.settings_form
+dependencies:
+  - drupal:node
+  - drupal:jsonapi
+  - drupal:rest
+  - restui:restui
+  - simple_decoupled_preview:simple_decoupled_preview_jsonapi
+
+# Information added by Drupal.org packaging script on 2023-06-06
+version: '1.0.0-rc2'
+project: 'simple_decoupled_preview'
+datestamp: 1686082834

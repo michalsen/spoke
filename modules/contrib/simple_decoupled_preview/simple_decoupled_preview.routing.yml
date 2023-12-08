@@ -1,0 +1,15 @@
+simple_decoupled_preview.settings_form:
+  path: '/admin/config/services/simple_decoupled_preview/settings'
+  defaults:
+    _form: '\Drupal\simple_decoupled_preview\Form\SettingsForm'
+    _title: 'Simple Decoupled Preview Logger'
+  requirements:
+    _permission: 'administer simple decoupled preview'
+
+simple_decoupled_preview.previews_log:
+  path: '/admin/config/services/simple_decoupled_preview/preview/logs'
+  defaults:
+    _entity_list: 'preview_log_entity'
+    _title: 'Previews Log'
+  requirements:
+    _permission: 'administer preview log entity entities'

@@ -1,0 +1,20 @@
+<?php
+
+/* 
+ * Implements hook_entity_presave().
+ */
+
+function custom_uid_field_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
+
+// Check if the entity being saved is a node and it's being created.
+if ($entity->getEntityTypeId() === 'node' && $entity->isNew()) {
+
+    // Get the current user.
+    $user = \Drupal::currentUser();
+    // Get the SiteID of the user.
+    $siteid = $user->field_user_site_id();
+
+    // Assign the siteid to the SiteID in the node.
+    $entity->set('field_site', $siteid);
+    }
+}
